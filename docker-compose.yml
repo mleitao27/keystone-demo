@@ -1,0 +1,33 @@
+version: '3.1'
+services:
+  mysql:
+    image: mysql:8.0
+    platform: linux/amd64
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: keystone
+      MYSQL_DATABASE: keystone
+      MYSQL_USER: keystone
+      MYSQL_PASSWORD: keystone
+    command: --max_allowed_packet=1073741824
+    volumes:
+      - keystone-mysql-data:/var/lib/mysql
+    ports:
+      - '3306:3306'
+  keystone:
+    build:
+      context: ./keystone
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: "mysql://root:keyston@db:3306/keystone"
+      NODE_ENV: "development"
+    volumes:
+      - ./keystone:/app
+      - /app/node_modules
+    depends_on:
+      - mysql
+volumes:
+  keystone-mysql-data:
